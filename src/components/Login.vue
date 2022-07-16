@@ -2,6 +2,22 @@
 import { ref } from 'vue';
 import axios from 'axios';
 import { useRouter } from 'vue-router';
+import 'js-loading-overlay';
+JsLoadingOverlay.setOptions({
+    "overlayBackgroundColor": "#666666",
+    "overlayOpacity": 0.6,
+    "spinnerIcon": "ball-atom",
+    "spinnerColor": "#000",
+    "spinnerSize": "3x",
+    "overlayIDName": "overlay",
+    "spinnerIDName": "spinner",
+    "offsetX": 0,
+    "offsetY": 0,
+    "containerID": null,
+    "lockScroll": false,
+    "overlayZIndex": 9998,
+    "spinnerZIndex": 9999
+});
 const props = defineProps({
 
 });
@@ -27,9 +43,9 @@ const onSubmitLogin = async event => {
         "password": passwordInputRef.value.value
     }
 
+    JsLoadingOverlay.show();
     try {
         let result = await axios.post(formLoginUrl, payload);
-        console.log(result.data);
         localStorage.setItem("Authorization", result.data.token);
         localStorage.setItem("ROLE", JSON.stringify(result.data.authorities));
         // router.push("/");
@@ -37,12 +53,17 @@ const onSubmitLogin = async event => {
             get: (searchParams, prop) => searchParams.get(prop),
         });
         // console.log(params.redirect);
+        
         if (params.redirect) {
-            window.location.href = params.redirect;
+            // window.location.href = params.redirect;
+            router.push(params.redirect);
         } else {
-            window.location.href = "/";
+            // window.location.href = "/";
+            router.push("/");
         }
+        JsLoadingOverlay.hide();
     } catch (ex) {
+        JsLoadingOverlay.hide();
         console.log(ex);
         errors.value.push("Sai email hoặc mật khẩu!");
     }

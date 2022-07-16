@@ -1,6 +1,10 @@
 <script setup>
-import { RouterLink, RouterView, useRoute } from 'vue-router'
-
+import { RouterLink, RouterView, useRouter } from 'vue-router'
+const router = useRouter();
+function logout() {
+  localStorage.removeItem("Authorization");
+  router.push("/login");
+}
 </script>
 <template>
     <!-- =========== Navigation Start ============ -->
@@ -30,13 +34,13 @@ import { RouterLink, RouterView, useRoute } from 'vue-router'
               </a>
             </li>
             <li>
-              <a class="nav-link d-lg-none" data-tooltip="logout" data-placement="top">
+              <a class="nav-link d-lg-none" data-tooltip="logout" data-placement="top" @click="logout()">
                   <i class="fas fa-sign-out-alt"></i>
               </a>
             </li>
           </ul>
           <div class="m-0 d-none d-lg-block">
-            <a class="nav-link m-0" data-tooltip="logout" data-placement="top">
+            <a class="nav-link m-0" data-tooltip="logout" data-placement="top" @click="logout()">
               <i class="fas fa-sign-out-alt"></i>
             </a>
           </div>

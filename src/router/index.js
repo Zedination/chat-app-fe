@@ -4,6 +4,7 @@ import LoginView from '../views/LoginView.vue'
 import Oauth2Redirect from '../views/Oauth2Redirect.vue'
 import ProfileTabView from '../views/ProfileTabView.vue';
 import jwt_decode from "jwt-decode";
+import { authenStore } from '../stores/authen';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -48,27 +49,31 @@ const router = createRouter({
     }
   ]
 })
-router.beforeEach((to, from) => {
+router.beforeResolve((to) => {
+  const isLoginPageStore = authenStore();
   if (to.name !== 'login') {
     document.getElementsByTagName('html')[0].classList.remove('login-special');
+    isLoginPageStore.isLoginPage = false;
+  } else {
+    document.getElementsByTagName('html')[0].classList.add('login-special');
+    isLoginPageStore.isLoginPage = true;
   }
   let jwtToken = localStorage.getItem('Authorization');
   if (!jwtToken && to.meta.requiresAuth) {
-    // return {
-    //   path: '/login',
-    //   // save the location we were at to come back later
-    //   query: { redirect: to.fullPath },
-    // }
-    document.location.href = `/login?redirect=${to.fullPath}`
+    return {
+      path: '/login',
+      // save the location we were at to come back later
+      query: { redirect: to.fullPath },
+    }
+    // document.location.href = `/login?redirect=${to.fullPath}`
   } else if (jwtToken) {
     let decoded = jwt_decode(jwtToken);
     if (Number(new Date()) / 1000 > decoded.exp && to.meta.requiresAuth) {
-      document.location.href = `/login?redirect=${to.fullPath}`
-      // return {
-      //   path: '/login',
-      //   // save the location we were at to come back later
-      //   query: { redirect: to.fullPath },
-      // }
+      return {
+        path: '/login',
+        // save the location we were at to come back later
+        query: { redirect: to.fullPath },
+      }
     }
   }
   
