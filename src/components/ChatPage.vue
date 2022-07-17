@@ -1,6 +1,7 @@
 <script setup>
 import { RouterLink, RouterView, useRoute } from 'vue-router'
 import LeftNav from '@/components/LeftNav.vue'
+import ChatContent from '@/components/ChatContent.vue';
 import { loadScript } from "vue-plugin-load-script";
 import "../assets/plugins/fontawesome/all.min.js"
 import "../assets/plugins/bootstrap/bootstrap.min.js"
@@ -14,6 +15,8 @@ import "../assets/plugins/bootstrap/bootstrap.min.js"
             <RouterView />
           </div>
     </aside>
+
+    <ChatContent />
   </div>
 </template>
 

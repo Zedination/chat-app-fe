@@ -68,6 +68,7 @@ router.beforeResolve((to) => {
     // document.location.href = `/login?redirect=${to.fullPath}`
   } else if (jwtToken) {
     let decoded = jwt_decode(jwtToken);
+    isLoginPageStore.userId = decoded.sub;
     if (Number(new Date()) / 1000 > decoded.exp && to.meta.requiresAuth) {
       return {
         path: '/login',

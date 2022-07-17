@@ -3,6 +3,9 @@ import { ref } from 'vue';
 import axios from 'axios';
 import { useRouter } from 'vue-router';
 import 'js-loading-overlay';
+import {authenStore} from '../stores/authen';
+import jwt_decode from "jwt-decode";
+
 JsLoadingOverlay.setOptions({
     "overlayBackgroundColor": "#666666",
     "overlayOpacity": 0.6,
@@ -45,9 +48,11 @@ const onSubmitLogin = async event => {
 
     JsLoadingOverlay.show();
     try {
+        const authen = authenStore();
         let result = await axios.post(formLoginUrl, payload);
         localStorage.setItem("Authorization", result.data.token);
         localStorage.setItem("ROLE", JSON.stringify(result.data.authorities));
+        authen.userId = jwt_decode(result.data.token).sub;
         // router.push("/");
         const params = new Proxy(new URLSearchParams(window.location.search), {
             get: (searchParams, prop) => searchParams.get(prop),

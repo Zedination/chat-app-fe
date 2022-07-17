@@ -3,7 +3,9 @@ import { defineStore, acceptHMRUpdate } from 'pinia'
 export const authenStore = defineStore({
     id: 'authen_store',
     state: () => ({
-        isLoginPage: true
+        isLoginPage: true,
+        userId: '',
+        userInfo: {}
     }),
     // getters: {
     //     isLoginPage: state => state.isLoginPage

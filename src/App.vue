@@ -12,3 +12,6 @@ const isLoginPageStore = authenStore();
   <RouterView v-if="isLoginPageStore.isLoginPage" />
   <!-- <LoginViewVue v-if="!isLoginPageStore.isLoginPage" /> -->
 </template>
+
+<style>
+</style>
