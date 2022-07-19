@@ -1,10 +1,16 @@
 <script setup>
 import { RouterLink, RouterView, useRouter } from 'vue-router'
 import { ref } from 'vue';
+import { chatRoomStore } from '../stores/chatRoom';
+
 const router = useRouter();
+const chatRoom = chatRoomStore();
 function logout() {
   localStorage.removeItem("Authorization");
+  chatRoom.rooms = [];
+  chatRoom.selected = '';
   router.push("/login");
+  // window.location.href = "/login";
 }
 const chatRef = ref(null);
 const profileRef = ref(null);

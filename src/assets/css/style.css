@@ -149,7 +149,7 @@ span {
   width: 100px; }
 
 .width--500 {
-  width: 500px; }
+  max-width: 500px; }
 
 /**! ----- Remove Margin and padding (spacing) from the first and last child---- **/
 .remove-space--bottom > li:last-child, .remove-space--bottom > div:last-child {

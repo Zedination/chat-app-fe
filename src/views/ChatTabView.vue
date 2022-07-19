@@ -29,7 +29,7 @@
                           <div class="chat-content">
                             <h3 v-if="item.group">{{item.name}}</h3>
                             <h3 v-else>{{item.conversationInfo.name}}</h3>
-                            <p>{{item.lastMessage ? item.lastMessage.content : 'Không có tin nhắn!'}}</p>
+                            <p>{{item.lastMessage ? (item.lastMessage.from === authen.userId ? 'Bạn: ' + item.lastMessage.content : item.lastMessage.content) : 'Không có tin nhắn!'}}</p>
                           </div>
                         </div>
                         <div class="chat-time">
@@ -48,29 +48,66 @@
 import { onMounted } from '@vue/runtime-core';
 import axios from 'axios';
 import { chatRoomStore } from '../stores/chatRoom';
+import { authenStore } from '../stores/authen';
 import appEmitter from '../composables/emiter';
+import { ref, toRaw } from 'vue';
 
 const emitter = appEmitter();
+const authen = authenStore();
 const chatRooms = chatRoomStore();
 const ROOT_URL = import.meta.env.VITE_ROOT_API;
-async function loadListRooms() {
-  try {
-    let res = await axios.get(`${ROOT_URL}/message/get-last-view-rooms`);
-    chatRooms.rooms = res.data;
-    chatRooms.selected = chatRooms.rooms[0].id;
-    clickRoom(chatRooms.selected);
-  } catch (error) {
-    console.log(error);
+// async function loadListRooms() {
+//   try {
+//     let res = await axios.get(`${ROOT_URL}/message/get-last-view-rooms`);
+//     chatRooms.rooms = res.data;
+//     chatRooms.selected = chatRooms.rooms[0].id;
+//     clickRoom(chatRooms.selected);
+//   } catch (error) {
+//     console.log(error);
+//   }
+// }
+
+function clickRoom(selectedRoom) {
+  // console.log(chatRooms.selected);
+  console.log("=== clicked ===");
+  // nếu chọn vào cuộc hội thoại đã chọn thì sẽ ko call api
+  if (selectedRoom !== chatRooms.selected) {
+    updateLastView(selectedRoom);
+    chatRooms.selected = selectedRoom;
+    handerSelectRoom(selectedRoom);
   }
 }
 
-function clickRoom(selectedRoom) {
-  chatRooms.selected = selectedRoom;
-  emitter.emit('select-room', selectedRoom);
+function updateLastView(roomId) {
+  axios.put(`${import.meta.env.VITE_ROOT_API}/message/update-last-view/${roomId}`);
 }
 
-onMounted(() => {
-  loadListRooms();
-});
+function loadMessage(selectedRoom) {
+    axios.get(`${ROOT_URL}/message/get-messages-by-room`, {
+        params: {
+            roomId: selectedRoom.id,
+            pageSize: selectedRoom.pageSize ? selectedRoom.pageSize : 50,
+            pageNumber: selectedRoom.pageNumber ? selectedRoom.pageNumber : 0
+        }
+    }).then(res => {
+        // đảo ngược array messages trước khi update vào store state
+        let messages = res.data.content.reverse();
+        chatRooms.updateMessagesOfRoom(selectedRoom.id, messages);
+    });
+}
+
+function handerSelectRoom(selectedRoomId) {
+  // với cách truy cập thuộc tính thông thường, Pinia sẽ trả về 1 proxy để ngăn cản chúng ta thay đổi thuộc tính của state tức thời,
+  // sử dụng toRaw để truy cập target của Proxy, tuy nhiên rất nguy hiểm vì nó có thể thay đổi data của thuộc tính của state tức thời, ảnh hưởng
+  // đến hành vi của đối tượng.
+  // ref về toRaw: https://stackoverflow.com/questions/51096547/how-to-get-the-target-of-a-javascript-proxy/70805174#70805174
+  // có thể sẽ thử cách chính thống hơn của Pinia: https://pinia.vuejs.org/core-concepts/state.html#mutating-the-state
+  let selectedRoom = toRaw(chatRooms.rooms.find(r => r.id === selectedRoomId));
+  // nếu selectedRoom.messages underfined (lần đầu load list chat rooms, chưa có message đi kèm) hoặc số lượng message trong phòng bằng 0 thì
+  // mới call lại api get messages theo id của room
+  if (!selectedRoom.messages || selectedRoom.messages.length === 0) {
+    loadMessage(selectedRoom);
+  }
+}
 
 </script>

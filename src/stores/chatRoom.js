@@ -4,9 +4,40 @@ export const chatRoomStore = defineStore({
     id: 'chat_room_store',
     state: () => ({
         rooms: [],
-        selected: ''
+        selected: '',
+        testObject: {a: 1, b: 2},
         
-    }), 
+    }),
+    getters: {
+        getMessagesOfSelectedRoom: state => {
+            let selectedRoom = state.rooms.find(r => r.id === state.selected);
+            if (selectedRoom && selectedRoom.messages) return selectedRoom.messages;
+            else return []
+        }, 
+        getConversationOfSelectedRoom: state => {
+            let selectedRoom = state.rooms.find(r => r.id === state.selected);
+            if (selectedRoom) {
+                if (selectedRoom.group) {
+                    return {
+                        id: selectedRoom.id,
+                        name: selectedRoom.name,
+                        avatar: selectedRoom.avatar,
+                        members: selectedRoom.members
+                    }
+                } else {
+                    return {
+                        id: selectedRoom.id,
+                        name: selectedRoom.conversationInfo.name,
+                        avatar: selectedRoom.conversationInfo.avatar,
+                        members: selectedRoom.members
+                    }
+                }
+            } else {
+                return {};
+            }
+        }
+
+    },
     actions: {
         formatDate(str) {
             let date = new Date(str);
@@ -19,8 +50,9 @@ export const chatRoomStore = defineStore({
         formatTime(str) {
             return new Date(str).toLocaleTimeString("vi-VN");
         },
-        getRoomById(roomId) {
-            return this.rooms.find(x => x.id === roomId);
-        }, 
+        updateMessagesOfRoom(roomId, messages) {
+            let room = this.rooms.find(r => r.id === roomId);
+            room.messages = room.messages ? messages.concat(room.messages) : messages;
+        }
     }
 })
