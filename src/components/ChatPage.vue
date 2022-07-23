@@ -9,14 +9,17 @@ import { onMounted, onUnmounted } from '@vue/runtime-core';
 import axios from 'axios';
 import { chatRoomStore } from '../stores/chatRoom';
 import { authenStore } from '../stores/authen';
+import { stompStore } from '../stores/stomp';
 import appEmitter from '../composables/emiter';
 import { ref, toRaw } from 'vue';
 import SockJS from "sockjs-client/dist/sockjs"
+// import SockJS from 'sockjs-client';
 import Stomp from "webstomp-client";
 
 const emitter = appEmitter();
 const authen = authenStore();
 const chatRooms = chatRoomStore();
+const stomp = stompStore()
 const ROOT_URL = import.meta.env.VITE_ROOT_API;
 const connected = ref(false);
 
@@ -64,63 +67,40 @@ function loadMessageForFirst(roomId) {
     });
 }
 
-const stompClient = Stomp.over(new SockJS(`${ROOT_URL}/chat-app`))
+// const stompClient = Stomp.over(new SockJS(`${ROOT_URL}/chat-app`))
 
 // async function connect() {
-//   chatRooms.getListRoomIds.forEach(rId => {
-//     console.log(rId + " xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
-//     if (connected.value) {
-//       stompClient.subscribe(`/chat/${rId}`, handlerMessage, {id: rId});
-//     } else {
-//       connected.value = true;
-//       stompClient.connect(
+//   console.log(this);
+//   if (!stompClient || !stompClient.connected) {
+//     stompClient.connect(
 //         {},
 //         frame => {
 //           connected.value = true;
 //           console.log("connected!");
 //           console.log(frame);
-//           stompClient.subscribe(`/chat/${rId}`, handlerMessage, {id: rId});
+//           subscribe();
 //         },
 //         error => {
 //           console.log(error);
 //           connected.value = false;
 //         }
 //       );
-//     }
-//   })
+//   }
 // }
-
-async function connect() {
-  if (!stompClient || !stompClient.connected) {
-    stompClient.connect(
-        {},
-        frame => {
-          connected.value = true;
-          console.log("connected!");
-          console.log(frame);
-          subscribe();
-        },
-        error => {
-          console.log(error);
-          connected.value = false;
-        }
-      );
-  }
-}
 
 async function subscribe() {
   chatRooms.getListRoomIds.forEach(rId => {
     console.log(rId + " xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
-    if (connected.value) {
-      stompClient.subscribe(`/chat/${rId}`, handlerMessage, {id: rId});
+    if (stomp.connected) {
+      stomp.getStompClient.subscribe(`/chat/${rId}`, handlerMessage, {id: rId});
     }
   })
 }
 
 
 function send(event) {
-  if (stompClient && stompClient.connected) {
-    stompClient.send(`/app/chat/${chatRooms.selected}`, JSON.stringify(event), {});
+  if (stomp.getStompClient && stomp.getStompClient.connected) {
+    stomp.getStompClient.send(`/app/chat/${chatRooms.selected}`, JSON.stringify(event), {});
   }
 }
 
@@ -135,10 +115,8 @@ function handlerMessage(message) {
 }
 
 function disconnectStomp(event) {
-    console.log("=========== when log out ============");
-  if (stompClient && stompClient.connected) {
-    stompClient.disconnect();
-  }
+  console.log("=========== when log out ============");
+  stomp.disconnect();
 }
 
 onMounted(async () => {
@@ -146,7 +124,8 @@ onMounted(async () => {
   // load user info
   await firstLoadUserInfo();
   await loadListRooms();
-  await connect();
+  // await connect();
+  stomp.connect(subscribe);
   // document.getElementById('chat-content').scrollIntoView({behavior: "smooth", block: "end"});
   document.getElementById('chat-content').scrollIntoView(false);
   // load message cho room đầu tiên
