@@ -7,9 +7,9 @@ export const authenStore = defineStore({
         userId: '',
         userInfo: {}
     }),
-    // getters: {
-    //     isLoginPage: state => state.isLoginPage
-    // },
+    getters: {
+        getUserInfo: state => state.userInfo
+    },
     // actions: {
     //     setIsLoginPage(isLoginPage) {
     //         this.isLoginPage = isLoginPage;

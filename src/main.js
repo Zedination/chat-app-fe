@@ -6,6 +6,9 @@ import { createPinia } from 'pinia'
 import mitt from 'mitt';
 import { jwtInterceptor } from './interceptors/jwtInterceptor';
 import { httpException, loadingIndicator } from './interceptors/http.interceptor';
+import Shimmer from 'vue3-shimmer';
+// var global = window;
+
 const app = createApp(App)
 const emitter = mitt();
 app.use(router)

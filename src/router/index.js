@@ -50,6 +50,7 @@ const router = createRouter({
   ]
 })
 router.beforeResolve((to) => {
+  if (to.name === 'oauth2-redirect') return; 
   const isLoginPageStore = authenStore();
   if (to.name !== 'login') {
     document.getElementsByTagName('html')[0].classList.remove('login-special');

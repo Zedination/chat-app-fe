@@ -29,7 +29,7 @@
                           <div class="chat-content">
                             <h3 v-if="item.group">{{item.name}}</h3>
                             <h3 v-else>{{item.conversationInfo.name}}</h3>
-                            <p>{{item.lastMessage ? (item.lastMessage.from === authen.userId ? 'Bạn: ' + item.lastMessage.content : item.lastMessage.content) : 'Không có tin nhắn!'}}</p>
+                            <p>{{item.lastMessage ? (item.lastMessage.isMe ? 'Bạn: ' + item.lastMessage.content : item.lastMessage.content) : 'Không có tin nhắn!'}}</p>
                           </div>
                         </div>
                         <div class="chat-time">
@@ -68,13 +68,16 @@ const ROOT_URL = import.meta.env.VITE_ROOT_API;
 // }
 
 function clickRoom(selectedRoom) {
-  // console.log(chatRooms.selected);
-  console.log("=== clicked ===");
+  setTimeout(() => {
+      document.getElementById('chat-content').scrollIntoView(false);
+      document.getElementsByClassName("chats")[0].classList.add("open");
+    }, 0);
   // nếu chọn vào cuộc hội thoại đã chọn thì sẽ ko call api
   if (selectedRoom !== chatRooms.selected) {
     updateLastView(selectedRoom);
     chatRooms.selected = selectedRoom;
-    handerSelectRoom(selectedRoom);
+    // load message từ đầu rồi nên không cần call api nữa
+    // handerSelectRoom(selectedRoom);
   }
 }
 

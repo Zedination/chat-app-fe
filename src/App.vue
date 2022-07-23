@@ -2,15 +2,15 @@
 import { RouterLink, RouterView, useRoute } from 'vue-router'
 import ChatPage from '@/components/ChatPage.vue'
 import LoginViewVue from './views/LoginView.vue';
-import {computed} from 'vue'
+import {computed, onMounted} from 'vue'
 import { authenStore } from './stores/authen';
-const isLoginPageStore = authenStore();
+const authen_store = authenStore();
 </script>
 
 <template>
-  <ChatPage v-if="!isLoginPageStore.isLoginPage" />
-  <RouterView v-if="isLoginPageStore.isLoginPage" />
-  <!-- <LoginViewVue v-if="!isLoginPageStore.isLoginPage" /> -->
+  <ChatPage v-if="!authen_store.isLoginPage" />
+  <RouterView v-if="authen_store.isLoginPage" />
+  <!-- <LoginViewVue v-if="!authen_store.isLoginPage" /> -->
 </template>
 
 <style>

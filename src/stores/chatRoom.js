@@ -35,6 +35,9 @@ export const chatRoomStore = defineStore({
             } else {
                 return {};
             }
+        },
+        getListRoomIds: state => {
+            return state.rooms.map(r => r.id);
         }
 
     },
@@ -53,6 +56,11 @@ export const chatRoomStore = defineStore({
         updateMessagesOfRoom(roomId, messages) {
             let room = this.rooms.find(r => r.id === roomId);
             room.messages = room.messages ? messages.concat(room.messages) : messages;
+        },
+        pushMessage(roomId, message) {
+            let room = this.rooms.find(r => r.id === roomId);
+            room.messages.push(message);
+            room.lastMessage = message;
         }
     }
 })

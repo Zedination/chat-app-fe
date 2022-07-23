@@ -5,7 +5,7 @@
         class="chat-header d-flex  justify-content-between align-items-center border-bottom border--gray p-4 sticky-top bg--white">
         <!-- <button type="button" id="toggle"><i class="fas fa-compress"></i></button> -->
         <div class="media d-flex align-items-center">
-          <div class="close-icon user-chat-remove d-lg-none me-3"><i
+          <div class="close-icon user-chat-remove d-lg-none me-3" @click="closeChats"><i
               class="fas fa-arrow-left font-size--14 text--dark-100"></i></div>
           <div class="position-relative">
             <img :src="chatRooms.getConversationOfSelectedRoom.avatar" :alt="chatRooms.getConversationOfSelectedRoom.name" class="rounded-circle me-3 hw-40">
@@ -57,7 +57,7 @@
         </ul>
       </div>
       <!-- message header end -->
-      <div class="chat-content p-4 mb-3">
+      <div class="chat-content p-4 mb-3" ref="chatContentRef" id="chat-content">
         <!-- <div class="date text-center mb-5">
                 <span class="text--gray-200 font-size--14 text-capitalize">20/12/2020</span>
               </div> -->
@@ -153,7 +153,7 @@
               </ul>
             </div>
             <div class="input-group">
-              <textarea class="form-control border-0 rounded p-2 mx-2" id="FormControlTextarea9" rows="1"></textarea>
+              <textarea @keydown.enter.prevent="sendMessageWithEnter($event)" class="form-control border-0 rounded p-2 mx-2" id="FormControlTextarea9" rows="1"></textarea>
             </div>
             <button type="submit" class="btn bg--primary submit-btn text-white me-2"><i
                 class="fas fa-paper-plane"></i></button>
@@ -267,14 +267,22 @@
 </template>
 <script setup>
 import { chatRoomStore } from '../stores/chatRoom';
+import { authenStore } from '../stores/authen';
 import axios from 'axios';
 import { onMounted, onUnmounted } from '@vue/runtime-core';
 import { storeToRefs } from 'pinia'
 import appEmitter from '../composables/emiter.js';
-import { isProxy, toRaw, ref, reactive } from 'vue';
+import { isProxy, toRaw, ref, reactive, watch } from 'vue';
 const ROOT_URL = import.meta.env.VITE_ROOT_API;
+const emit = defineEmits(['sendMessage', 'submit'])
 const chatRooms = chatRoomStore();
+const authen = authenStore();
 const emiter = appEmitter();
+
+const props = defineProps(['temp']);
+
+const chatContentRef = ref(null);
+
 function loadMessage(selectedRoom) {
     axios.get(`${ROOT_URL}/message/get-messages-by-room`, {
         params: {
@@ -303,6 +311,27 @@ function handerSelectRoom(selectedRoomId) {
   if (!selectedRoom.messages || selectedRoom.messages.length === 0) {
     loadMessage(selectedRoom);
   }
+}
+
+function sendMessageWithEnter(event) {
+  const message = event.target.value;
+  const messagePayload = {
+    content: message,
+    fromUser: authen.getUserInfo.id,
+    roomId: chatRooms.selected
+  }
+  emit('sendMessage', messagePayload);
+  event.target.value = '';
+}
+
+function scrollToBottom() {
+  chatContentRef.value.scrollIntoView({behavior: "smooth", block: "end"});
+}
+
+function closeChats() {
+  setTimeout(() => {
+    document.getElementsByClassName("chats")[0].classList.remove("open");
+  }, 0);
 }
 
 

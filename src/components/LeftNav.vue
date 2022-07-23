@@ -2,10 +2,12 @@
 import { RouterLink, RouterView, useRouter } from 'vue-router'
 import { ref } from 'vue';
 import { chatRoomStore } from '../stores/chatRoom';
-
+import appEmitter from '../composables/emiter.js';
 const router = useRouter();
 const chatRoom = chatRoomStore();
+const emiter = appEmitter();
 function logout() {
+  emiter.emit('logout');
   localStorage.removeItem("Authorization");
   chatRoom.rooms = [];
   chatRoom.selected = '';
