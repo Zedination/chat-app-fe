@@ -22,14 +22,20 @@ export const chatRoomStore = defineStore({
                         id: selectedRoom.id,
                         name: selectedRoom.name,
                         avatar: selectedRoom.avatar,
-                        members: selectedRoom.members
+                        members: selectedRoom.members,
+                        description: selectedRoom.description,
+                        isGroup: true
                     }
                 } else {
                     return {
                         id: selectedRoom.id,
                         name: selectedRoom.conversationInfo.name,
                         avatar: selectedRoom.conversationInfo.avatar,
-                        members: selectedRoom.members
+                        email: selectedRoom.conversationInfo.email,
+                        address: selectedRoom.conversationInfo.address,
+                        members: selectedRoom.members,
+                        description: selectedRoom.conversationInfo.description,
+                        isGroup: false
                     }
                 }
             } else {

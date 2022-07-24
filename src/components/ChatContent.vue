@@ -1,6 +1,6 @@
 <template>
   <div class="chats tab-content w-100">
-    <div class="chat-body tab-pane fade active" id="conversation1">
+    <div class="chat-body tab-pane fade active" id="conversation1" :class="{'small-sidebar': isShowRightBar}">
       <div
         class="chat-header d-flex  justify-content-between align-items-center border-bottom border--gray p-4 sticky-top bg--white">
         <!-- <button type="button" id="toggle"><i class="fas fa-compress"></i></button> -->
@@ -8,12 +8,14 @@
           <div class="close-icon user-chat-remove d-lg-none me-3" @click="closeChats"><i
               class="fas fa-arrow-left font-size--14 text--dark-100"></i></div>
           <div class="position-relative">
-            <img :src="chatRooms.getConversationOfSelectedRoom.avatar" :alt="chatRooms.getConversationOfSelectedRoom.name" class="rounded-circle me-3 hw-40">
+            <img :src="chatRooms.getConversationOfSelectedRoom.avatar"
+              :alt="chatRooms.getConversationOfSelectedRoom.name" class="rounded-circle me-3 hw-40">
             <span class="status online"></span>
           </div>
           <div class="media-body">
             <a href="#">
-              <h3 class="user-name">{{chatRooms.getConversationOfSelectedRoom.name}}</h3>
+              <h3 class="user-name" @click.prevent="isShowRightBar=!isShowRightBar">
+                {{chatRooms.getConversationOfSelectedRoom.name}}</h3>
             </a>
           </div>
         </div>
@@ -28,16 +30,19 @@
             </form>
           </li>
           <li class="me-4">
-            <a href="#" class="user-icon">
+            <a href="#" class="user-icon" @click.prevent="isShowRightBar=!isShowRightBar">
               <i class="far fa-user text--dark-100 font-size--18"></i>
             </a>
           </li>
           <li class="me-4">
             <div class="dropdown">
-              <button class="btn p-0 btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton12"
+              <a href="#" class="user-icon" id="dropdownMenuButton12" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="fas fa-ellipsis-v text--dark-100 font-size--18"></i>
+              </a>
+              <!-- <button class="btn p-0 btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton12"
                 data-bs-toggle="dropdown" aria-expanded="false">
                 <i class="fas fa-ellipsis-v text--dark-100 font-size--18"></i>
-              </button>
+              </button> -->
               <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton12">
                 <li>
                   <a class="dropdown-item d-flex justify-content-between align-items-center font-size--14"
@@ -107,8 +112,8 @@
                       <i class="fas fa-ellipsis-v text--dark-100"></i>
                     </button>
                     <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton14">
-                      <li><a @click="navigator.clipboard.writeText(message.content)" 
-                            class="dropdown-item d-flex justify-content-between align-items-center" href="#">sao chép<i
+                      <li><a @click="navigator.clipboard.writeText(message.content)"
+                          class="dropdown-item d-flex justify-content-between align-items-center" href="#">sao chép<i
                             class="far fa-copy"></i></a></li>
                       <li><a class="dropdown-item d-flex justify-content-between align-items-center" href="#">xóa<i
                             class="fas fa-trash-alt"></i></a></li>
@@ -153,7 +158,8 @@
               </ul>
             </div>
             <div class="input-group">
-              <textarea @keydown.enter.prevent="sendMessageWithEnter($event)" class="form-control border-0 rounded p-2 mx-2" id="FormControlTextarea9" rows="1"></textarea>
+              <textarea @keydown.enter.prevent="sendMessageWithEnter($event)"
+                class="form-control border-0 rounded p-2 mx-2" id="FormControlTextarea9" rows="1"></textarea>
             </div>
             <button type="submit" class="btn bg--primary submit-btn text-white me-2"><i
                 class="fas fa-paper-plane"></i></button>
@@ -161,99 +167,102 @@
         </form>
       </div>
       <!-- message footer end -->
-      <div class="right-sidebar border-start border--gray">
+      <div class="right-sidebar border-start border--gray" :class="{show: isShowRightBar}">
         <div
           class="profile-info d-flex justify-content-center py-3 mb-2 border-bottom border--gray sticky-top bg--white">
           <div class="text-center">
-            <img src="assets/images/avatar/1.png" alt="" class="hw-100 rounded-circle mb-1 img-fluid">
-            <h2>Catherine Richardson</h2>
+            <img
+              :src="chatRooms.getConversationOfSelectedRoom.avatar ? chatRooms.getConversationOfSelectedRoom.avatar : noImage"
+              alt="" class="hw-100 rounded-circle mb-1 img-fluid">
+            <h2>{{chatRooms.getConversationOfSelectedRoom.name}}</h2>
             <span class="status online position-relative">active</span>
           </div>
-          <div class="close-icon user-profile-hide position-absolute"><i class="fas fa-times"></i></div>
+          <div @click.prevent="isShowRightBar=false" class="close-icon user-profile-hide position-absolute"><i
+              class="fas fa-times"></i></div>
         </div>
         <div class="description text-center pb-3 mb-5 px-3">
-          <p>If several languages coalesce, the grammar of the resulting language is more simple and regular than that
-            of the individual.</p>
+          <p>{{chatRooms.getConversationOfSelectedRoom.description ? chatRooms.getConversationOfSelectedRoom.description
+            : 'Không có mô tả!'}}</p>
         </div>
 
         <div class="user-profile-accordion accordion px-3" id="accordionExample9">
           <div class="accordion-item border border--gray mb-3">
             <h2 class="accordion-header" id="heading5">
-              <button class="accordion-button bg--light-gray-200 p-3 border-0" type="button" data-bs-toggle="collapse"
+              <button v-if="!chatRooms.getConversationOfSelectedRoom.isGroup"
+                class="accordion-button bg--light-gray-200 p-3 border-0" type="button" data-bs-toggle="collapse"
                 data-bs-target="#collapse5" aria-expanded="true" aria-controls="collapse5"><i
-                  class="far fa-user me-2"></i>personal info</button>
+                  class="far fa-user me-2"></i>Thông tin cá nhân</button>
+              <button v-else class="accordion-button bg--light-gray-200 p-3 border-0" type="button"
+                data-bs-toggle="collapse" data-bs-target="#collapse5" aria-expanded="true" aria-controls="collapse5"><i
+                  class="fas fa-user-friends me-2"></i>Thông tin nhóm</button>
             </h2>
-            <div id="collapse5" class="accordion-collapse collapse show border-0" aria-labelledby="heading5"
+            <div v-if="!chatRooms.getConversationOfSelectedRoom.isGroup" id="collapse5"
+              class="accordion-collapse collapse show border-0" aria-labelledby="heading5"
               data-bs-parent="#accordionExample9">
               <div class="card-body bg--white remove-space--bottom">
                 <div class="mb-4">
-                  <p>Name</p>
-                  <h3>Catherine Richardson</h3>
+                  <p>Họ tên</p>
+                  <h3>{{chatRooms.getConversationOfSelectedRoom.name}}</h3>
                 </div>
                 <div class="mb-4">
                   <p>Email</p>
-                  <a href="mailto:catherine.richard@gmail.com" class="email-address">catherine.richard@gmail.com</a>
+                  <a :href="'mailto:' + chatRooms.getConversationOfSelectedRoom.email"
+                    class="email-address">{{chatRooms.getConversationOfSelectedRoom.email}}</a>
                 </div>
                 <div class="mb-4">
-                  <p>Time</p>
-                  <h3>10PM</h3>
+                  <p>Địa chỉ</p>
+                  <h3>{{chatRooms.getConversationOfSelectedRoom.address ?
+                    chatRooms.getConversationOfSelectedRoom.address : 'Không có thông tin.'}}</h3>
                 </div>
                 <div class="mb-4">
-                  <p>Location</p>
-                  <h3>California, USA</h3>
+                  <p>Mô tả</p>
+                  <h3>{{chatRooms.getConversationOfSelectedRoom.description ?
+                    chatRooms.getConversationOfSelectedRoom.description : 'Không có thông tin.'}}</h3>
+                </div>
+              </div>
+            </div>
+            <div v-else id="collapse5" class="accordion-collapse collapse show border-0" aria-labelledby="heading5"
+              data-bs-parent="#accordionExample9">
+              <div class="card-body bg--white remove-space--bottom">
+                <div class="mb-4">
+                  <p>Tên nhóm</p>
+                  <h3>{{chatRooms.getConversationOfSelectedRoom.name}}</h3>
+                </div>
+                <div class="mb-4">
+                  <p>Mô tả</p>
+                  <h3>{{chatRooms.getConversationOfSelectedRoom.description ?
+                    chatRooms.getConversationOfSelectedRoom.description : 'Không có thông tin.'}}</h3>
                 </div>
               </div>
             </div>
           </div>
 
-          <div class="accordion-item border border--gray mb-3">
+          <div v-if="chatRooms.getConversationOfSelectedRoom.isGroup" class="accordion-item border border--gray mb-3">
             <h3 class="accordion-header" id="heading6">
               <button class="accordion-button bg--light-gray-200 collapsed p-3 border-0" type="button"
                 data-bs-toggle="collapse" data-bs-target="#collapse6" aria-expanded="false" aria-controls="collapse6"><i
-                  class="fas fa-paperclip  me-2"></i>Attached Files</button>
+                  class="fas fa-list me-2"></i>Thành viên nhóm</button>
             </h3>
             <div id="collapse6" class="accordion-collapse collapse border-0" aria-labelledby="heading6"
               data-bs-parent="#accordionExample9">
               <div class="card-body bg--white">
-                <div class="d-flex justify-content-between align-items-center mb-3 border px-3 py-2">
+                <!-- <div class="d-flex justify-content-between align-items-center mb-3 border px-3 py-2">
                   <i class="far fa-images text--primary font-size--18"></i>
                   <div>
                     <h3>1.png</h3>
                     <p>23.00 KB </p>
                   </div>
                   <a href="assets/images/avatar/profile.png" download><i class="fas fa-download text--dark-100"></i></a>
-                </div>
-                <div class="d-flex justify-content-between align-items-center mb-3 border px-3 py-2">
-                  <i class="far fa-file-archive text--primary font-size--18"></i>
-                  <div>
-                    <h3>1.png</h3>
-                    <p>442.00 KB </p>
+                </div> -->
+                <div v-for="member in chatRooms.getConversationOfSelectedRoom.members" :key="member.id"
+                  class="row border mb-2 px-2 py-2">
+                  <div class="col-3">
+                    <img class="rounded-circle me-3 hw-40" :src="member.avatar ? member.avatar : noImage"
+                      :alt="member.name" />
                   </div>
-                  <a href="assets/zip/fontawesome.zip" download><i class="fas fa-download text--dark-100"></i></a>
-                </div>
-                <div class="d-flex justify-content-between align-items-center mb-3 border px-3 py-2">
-                  <i class="far fa-images text--primary font-size--18"></i>
-                  <div>
-                    <h3>1.png</h3>
-                    <p>23.00 KB </p>
+                  <div class="col-9 container-for-center d-flex justify-content-end">
+                    <p class="vertical-center" style="text-align: center;">{{member.name}}</p>
                   </div>
-                  <a href="assets/images/avatar/profile.png" download><i class="fas fa-download text--dark-100"></i></a>
-                </div>
-                <div class="d-flex justify-content-between align-items-center mb-3 border px-3 py-2">
-                  <i class="far fa-file-archive text--primary font-size--18"></i>
-                  <div>
-                    <h3>1.png</h3>
-                    <p>442.00 KB </p>
-                  </div>
-                  <a href="assets/zip/fontawesome.zip" download><i class="fas fa-download text--dark-100"></i></a>
-                </div>
-                <div class="d-flex justify-content-between align-items-center mb-3 border px-3 py-2">
-                  <i class="far fa-file-archive text--primary font-size--18"></i>
-                  <div>
-                    <h3>1.png</h3>
-                    <p>442.00 KB </p>
-                  </div>
-                  <a href="assets/zip/fontawesome.zip" download><i class="fas fa-download text--dark-100"></i></a>
                 </div>
               </div>
             </div>
@@ -278,10 +287,11 @@ const emit = defineEmits(['sendMessage', 'submit'])
 const chatRooms = chatRoomStore();
 const authen = authenStore();
 const emiter = appEmitter();
-
-const props = defineProps(['temp']);
+const noImage = ref('https://t3.ftcdn.net/jpg/04/34/72/82/360_F_434728286_OWQQvAFoXZLdGHlObozsolNeuSxhpr84.jpg');
 
 const chatContentRef = ref(null);
+
+let isShowRightBar = ref(false);
 
 function loadMessage(selectedRoom) {
     axios.get(`${ROOT_URL}/message/get-messages-by-room`, {
@@ -346,3 +356,17 @@ function closeChats() {
 // })
 
 </script>
+
+<style scoped>
+.container-for-center {
+  position: relative;
+}
+
+.vertical-center {
+  margin: 0;
+  position: absolute;
+  top: 50%;
+  -ms-transform: translateY(-50%);
+  transform: translateY(-50%);
+}
+</style>
