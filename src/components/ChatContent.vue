@@ -131,7 +131,7 @@
       </div>
       <!-- message content end -->
       <div class="chat-footer position-fixed bottom-0 bg--light-gray-200">
-        <form action="#" class="form">
+        <form class="form">
           <div class="d-flex">
             <div class="dropdown d-flex">
               <button class="btn p-0 btn-secondary dropdown-toggle ms-2" type="button" id="dropdownMenuButton22"
@@ -159,9 +159,9 @@
             </div>
             <div class="input-group">
               <textarea @keydown.enter.prevent="sendMessageWithEnter($event)"
-                class="form-control border-0 rounded p-2 mx-2" id="FormControlTextarea9" rows="1"></textarea>
+                class="form-control border-0 rounded p-2 mx-2" id="FormControlTextarea9" rows="1" ref="chatSendRef"></textarea>
             </div>
-            <button type="submit" class="btn bg--primary submit-btn text-white me-2"><i
+            <button type="button" class="btn bg--primary submit-btn text-white me-2" @click.prevent="sendMessageWithButton()"><i
                 class="fas fa-paper-plane"></i></button>
           </div>
         </form>
@@ -290,6 +290,7 @@ const emiter = appEmitter();
 const noImage = ref('https://t3.ftcdn.net/jpg/04/34/72/82/360_F_434728286_OWQQvAFoXZLdGHlObozsolNeuSxhpr84.jpg');
 
 const chatContentRef = ref(null);
+const chatSendRef = ref(null);
 
 let isShowRightBar = ref(false);
 
@@ -325,6 +326,7 @@ function handerSelectRoom(selectedRoomId) {
 
 function sendMessageWithEnter(event) {
   const message = event.target.value;
+  if (!message || message.trim() === '') return;
   const messagePayload = {
     content: message,
     fromUser: authen.getUserInfo.id,
@@ -332,6 +334,18 @@ function sendMessageWithEnter(event) {
   }
   emit('sendMessage', messagePayload);
   event.target.value = '';
+}
+
+function sendMessageWithButton() {
+  const message = chatSendRef.value.value;
+  if (!message || message.trim() === '') return;
+  const messagePayload = {
+    content: message,
+    fromUser: authen.getUserInfo.id,
+    roomId: chatRooms.selected
+  }
+  emit('sendMessage', messagePayload);
+  chatSendRef.value.value = '';
 }
 
 function scrollToBottom() {
