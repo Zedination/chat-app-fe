@@ -1,47 +1,77 @@
 <template>
-    <div class="tab_pane chats-tab active">
-              <div class="sidebar-header p-3">
-                <h1 class="mb-3">Cuộc hội thoại</h1>
-                <div class="search position-relative mb-3">
-                  <form action="#" class="form search-form-1">
-                    <input type="text" placeholder="search" class="w-100"/>
-                    <button type="button"><i class="fa fa-search"></i></button>
-                  </form>
-                </div>
-                <h2 class="text-capitalize font-weight--700">gần đây</h2>
+  <div class="tab_pane chats-tab active">
+    <div class="sidebar-header p-3">
+      <h1 class="mb-3">Cuộc hội thoại</h1>
+      <div class="search position-relative mb-3">
+        <form action="#" class="form search-form-1">
+          <input type="text" placeholder="search" class="w-100" />
+          <button type="button"><i class="fa fa-search"></i></button>
+        </form>
+      </div>
+      <h2 class="text-capitalize font-weight--700">gần đây</h2>
 
+    </div>
+    <div class="p-3">
+      <div class="chat-list">
+        <!-- <paragraph-shimmer :is-loading="true" :lines="40" :random-size="true" /> -->
+        <ul v-if="chatRooms.isLoading" class="nav remove-space--bottom">
+          <li v-for="index in [1,2,3,4,5,6,7,8,9,10]" :key="index" class="chat-item nav-item w-100 rounded mb-3">
+            <paragraph-shimmer :is-loading="true" :lines="3" :random-size="true" />
+          </li>
+        </ul>
+        <ul class="nav remove-space--bottom">
+          <li v-for="item in chatRooms.rooms" :key="item.id" @click="clickRoom(item.id)"
+            class="chat-item border border--gray nav-item w-100 rounded mb-3"
+            :class="{open: item.id === chatRooms.selected}">
+            <a class="nav-link active d-flex justify-content-between p-3" data-bs-toggle="pill" href="#conversation1">
+              <div class="d-flex" style="max-width: 80%;">
+                <div class="position-relative">
+                  <img v-if="item.group" :src="item.avatar" alt="" class="rounded-circle me-3 hw-40 img-fluid">
+                  <img v-else :src="item.conversationInfo.avatar" alt="" class="rounded-circle me-3 hw-40 img-fluid">
+
+                  <span class="status online position-absolute"></span>
+                </div>
+                <div class="chat-content" style="max-width: 75%;">
+                  <h3 v-if="item.group">{{item.name}}</h3>
+                  <h3 v-else>{{item.conversationInfo.name}}</h3>
+                  <p class="text-ellipsis">{{item.lastMessage ? (item.lastMessage.isMe ? 'Bạn: ' +
+                    item.lastMessage.content : item.lastMessage.content) : 'Không có tin nhắn!'}}</p>
+                </div>
               </div>
-              <div class="p-3">
-                <div class="chat-list">
-                  <ul class="nav remove-space--bottom">
-                    <li v-for="item in chatRooms.rooms" :key="item.id" @click="clickRoom(item.id)"
+              <div class="chat-time">
+                <h3 class="text--gray-200">{{item.lastMessage ? chatRooms.formatDate(item.lastMessage.createAt) : ''}}
+                </h3>
+                <h3 class="text--gray-200">{{item.lastMessage ? chatRooms.formatTime(item.lastMessage.createAt) : ''}}
+                </h3>
+              </div>
+            </a>
+          </li>
+          <!-- <li v-for="item in chatRooms.rooms" :key="item.id" @click="clickRoom(item.id)"
                      class="chat-item border border--gray nav-item w-100 rounded mb-3" :class="{open: item.id === chatRooms.selected}">
-                      <a class="nav-link active d-flex justify-content-between p-3" data-bs-toggle="pill" href="#conversation1">
-                        <div class="d-flex">
-                          <div class="position-relative">
-                            <!-- if isGroup = true -->
+                      <a class="nav-link active d-flex justify-content-between p-3 row" data-bs-toggle="pill" href="#conversation1">
+                        <div class="col-8 row">
+                          <div class="col-3">
                             <img v-if="item.group" :src="item.avatar" alt="" class="rounded-circle me-3 hw-40 img-fluid">
-                            <!-- else isGroup = false -->
                             <img v-else :src="item.conversationInfo.avatar" alt="" class="rounded-circle me-3 hw-40 img-fluid">
 
-                            <span class="status online position-absolute"></span>
+                            <span class="status online"></span>
                           </div>
-                          <div class="chat-content">
+                          <div class="chat-content col-9">
                             <h3 v-if="item.group">{{item.name}}</h3>
                             <h3 v-else>{{item.conversationInfo.name}}</h3>
-                            <p>{{item.lastMessage ? (item.lastMessage.isMe ? 'Bạn: ' + item.lastMessage.content : item.lastMessage.content) : 'Không có tin nhắn!'}}</p>
+                            <p class="text-ellipsis">{{item.lastMessage ? (item.lastMessage.isMe ? 'Bạn: ' + item.lastMessage.content : item.lastMessage.content) : 'Không có tin nhắn!'}}</p>
                           </div>
                         </div>
-                        <div class="chat-time">
+                        <div class="chat-time col-4">
                           <h3 class="text--gray-200">{{item.lastMessage ? chatRooms.formatDate(item.lastMessage.createAt) : ''}}</h3>
                           <h3 class="text--gray-200">{{item.lastMessage ? chatRooms.formatTime(item.lastMessage.createAt) : ''}}</h3>
                         </div>
                       </a>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </div>
+                    </li> -->
+        </ul>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup>
@@ -56,6 +86,7 @@ const emitter = appEmitter();
 const authen = authenStore();
 const chatRooms = chatRoomStore();
 const ROOT_URL = import.meta.env.VITE_ROOT_API;
+
 // async function loadListRooms() {
 //   try {
 //     let res = await axios.get(`${ROOT_URL}/message/get-last-view-rooms`);
@@ -114,3 +145,11 @@ function handerSelectRoom(selectedRoomId) {
 }
 
 </script>
+
+<style scoped>
+.text-ellipsis {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+</style>

@@ -17,6 +17,7 @@ app.use(createPinia())
 app.use(jwtInterceptor())
 app.use(httpException())
 app.use(loadingIndicator())
+app.use(Shimmer)
 app.config.globalProperties.emitter = emitter;
 
 app.mount('#app')

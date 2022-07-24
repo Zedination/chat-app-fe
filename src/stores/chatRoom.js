@@ -6,6 +6,7 @@ export const chatRoomStore = defineStore({
         rooms: [],
         selected: '',
         testObject: {a: 1, b: 2},
+        isLoading: false
         
     }),
     getters: {
@@ -44,6 +45,9 @@ export const chatRoomStore = defineStore({
         },
         getListRoomIds: state => {
             return state.rooms.map(r => r.id);
+        },
+        isEmptyRoom: state => {
+            return !state.rooms || state.rooms.length === 0
         }
 
     },

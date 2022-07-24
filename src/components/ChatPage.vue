@@ -122,10 +122,12 @@ function disconnectStomp(event) {
 onMounted(async () => {
   emitter.on('logout', disconnectStomp);
   // load user info
+  chatRooms.isLoading = true;
   await firstLoadUserInfo();
   await loadListRooms();
   // await connect();
   stomp.connect(subscribe);
+  chatRooms.isLoading = false;
   // document.getElementById('chat-content').scrollIntoView({behavior: "smooth", block: "end"});
   document.getElementById('chat-content').scrollIntoView(false);
   // load message cho room đầu tiên
@@ -143,7 +145,7 @@ onMounted(async () => {
           </div>
     </aside>
 
-    <ChatContent :temp="!changedTemp.value" @send-message="send" />
+    <ChatContent v-show="!chatRooms.isEmptyRoom" :temp="!changedTemp.value" @send-message="send" />
   </div>
 </template>
 
