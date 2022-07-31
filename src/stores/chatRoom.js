@@ -30,6 +30,7 @@ export const chatRoomStore = defineStore({
                 } else {
                     return {
                         id: selectedRoom.id,
+                        userId: selectedRoom.conversationInfo.id,
                         name: selectedRoom.conversationInfo.name,
                         avatar: selectedRoom.conversationInfo.avatar,
                         email: selectedRoom.conversationInfo.email,

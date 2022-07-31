@@ -24,14 +24,19 @@
             <a href="#search" class="search-btn">
               <i class="fas fa-search text--dark-100 font-size--18"></i>
             </a>
-            <form action="#" class="form search-form-1 position-absolute">
+            <!-- <form action="#" class="form search-form-1 position-absolute">
               <input type="text" placeholder="search" class="w-100" />
               <button type="button"><i class="fas fa-search text--dark-100 font-size--18"></i></button>
-            </form>
+            </form> -->
+          </li>
+          <li class="me-4">
+            <a href="#" class="user-icon" @click.prevent="isShowPopupCallVideo=!isShowPopupCallVideo">
+              <i class="fas fa-video text--dark-100 font-size--18"></i>
+            </a>
           </li>
           <li class="me-4">
             <a href="#" class="user-icon" @click.prevent="isShowRightBar=!isShowRightBar">
-              <i class="far fa-user text--dark-100 font-size--18"></i>
+              <i class="fas fa-user text--dark-100 font-size--18"></i>
             </a>
           </li>
           <li class="me-4">
@@ -60,6 +65,10 @@
             </div>
           </li>
         </ul>
+        <PopupCallVideo :title="'Bắt đầu cuộc gọi thoại!'" :user-id="!chatRooms.getConversationOfSelectedRoom.isGroup ? chatRooms.getConversationOfSelectedRoom.userId : authen.userId" v-if="isShowPopupCallVideo" :is-show="isShowPopupCallVideo" 
+        :audio-enable="true" :video-enable="true"
+        @on-close="isShowPopupCallVideo=!isShowPopupCallVideo">
+        </PopupCallVideo>
       </div>
       <!-- message header end -->
       <div class="chat-content p-4 mb-3" ref="chatContentRef" id="chat-content">
@@ -277,6 +286,7 @@
 <script setup>
 import { chatRoomStore } from '../stores/chatRoom';
 import { authenStore } from '../stores/authen';
+import PopupCallVideo from './PopupCallVideo.vue';
 import axios from 'axios';
 import { onMounted, onUnmounted } from '@vue/runtime-core';
 import { storeToRefs } from 'pinia'
@@ -293,6 +303,7 @@ const chatContentRef = ref(null);
 const chatSendRef = ref(null);
 
 let isShowRightBar = ref(false);
+const isShowPopupCallVideo = ref(false);
 
 function loadMessage(selectedRoom) {
     axios.get(`${ROOT_URL}/message/get-messages-by-room`, {

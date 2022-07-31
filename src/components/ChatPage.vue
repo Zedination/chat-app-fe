@@ -15,6 +15,8 @@ import { ref, toRaw } from 'vue';
 import SockJS from "sockjs-client/dist/sockjs"
 // import SockJS from 'sockjs-client';
 import Stomp from "webstomp-client";
+import { Peer } from "peerjs";
+import Swal from 'sweetalert2'
 
 const emitter = appEmitter();
 const authen = authenStore();
@@ -24,6 +26,8 @@ const ROOT_URL = import.meta.env.VITE_ROOT_API;
 const connected = ref(false);
 
 const changedTemp = ref(false);
+
+// const soundCall = new Audio('../assets/music/call.mp3');
 
 async function loadListRooms() {
   try {
@@ -119,6 +123,38 @@ function disconnectStomp(event) {
   stomp.disconnect();
 }
 
+async function initPeerJs() {
+  const peer = window.peer = new Peer(authen.userId);
+  peer.on('open', function (id) {
+    console.log('My peer ID is: ' + id);
+  });
+  peer.on('call', function (call) {
+    console.log(call);
+    Swal.fire({
+      title: 'Có cuộc gọi đến',
+      text: `Cuộc gọi đến từ ${call.peer}`,
+      icon: `info`,
+      showDenyButton: true,
+      confirmButtonText: '<i class="fas fa-phone"></i>',
+      denyButtonText: 'Từ chối',
+      customClass: {
+        actions: 'oncall-action',
+        denyButton: 'order-3',
+        confirmButton: 'swal-confirm-button'
+      }
+    }).then(result => {
+
+    })
+
+    // // Answer the call, providing our mediaStream
+    // call.answer(localStream);
+    // call.on('stream', remoteStream => {
+    //   document.querySelector('#remoteVideo').srcObject = remoteStream;
+    // })
+  });
+
+}
+
 onMounted(async () => {
   emitter.on('logout', disconnectStomp);
   // load user info
@@ -132,6 +168,10 @@ onMounted(async () => {
   document.getElementById('chat-content').scrollIntoView(false);
   // load message cho room đầu tiên
   // emitter.emit('select-room', chatRooms.selected);
+
+  // WebRTC peerJs
+  initPeerJs();
+  // soundCall.play();
 });
 
 </script>

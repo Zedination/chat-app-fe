@@ -14,4 +14,5 @@ const authen_store = authenStore();
 </template>
 
 <style>
+@import '@sweetalert2/theme-bulma/bulma.css';
 </style>

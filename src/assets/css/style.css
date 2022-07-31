@@ -115,11 +115,22 @@ span {
 .bg--light-gray-200 {
   background-color: #F5F6FA; }
 
+.bg--gray {
+  background-color: #7a7f9a !important;
+}
+
 .border--primary {
   border-color: #16a085 !important; }
 
 .border--gray {
   border-color: #dbdbdb !important; }
+
+.bg--red {
+  background-color: red !important;
+}
+.bg--success {
+  background-color: #22c91c !important;
+}
 
 /*======== Button ========*/
 .btn {
@@ -612,3 +623,7 @@ a[data-tooltip] {
   background: #000000; }
   [data-appearance=dark] h1, [data-appearance=dark] h2, [data-appearance=dark] h3, [data-appearance=dark] h4, [data-appearance=dark] h5, [data-appearance=dark] h6 {
     color: white; }
+
+.swal-confirm-button {
+  background-color: green !important;
+}
