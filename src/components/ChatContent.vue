@@ -65,10 +65,10 @@
             </div>
           </li>
         </ul>
-        <PopupCallVideo :title="'Bắt đầu cuộc gọi thoại!'" :user-id="!chatRooms.getConversationOfSelectedRoom.isGroup ? chatRooms.getConversationOfSelectedRoom.userId : authen.userId" v-if="isShowPopupCallVideo" :is-show="isShowPopupCallVideo" 
-        :audio-enable="true" :video-enable="true"
+        <PopupCallVideoOneCaller :title="'Bắt đầu cuộc gọi thoại!'" :user-id="!chatRooms.getConversationOfSelectedRoom.isGroup ? chatRooms.getConversationOfSelectedRoom.userId : authen.userId" v-if="isShowPopupCallVideo" :is-show="isShowPopupCallVideo" 
+        :audio-enable="true" :video-enable="true" :is-caller="true"
         @on-close="isShowPopupCallVideo=!isShowPopupCallVideo">
-        </PopupCallVideo>
+        </PopupCallVideoOneCaller>
       </div>
       <!-- message header end -->
       <div class="chat-content p-4 mb-3" ref="chatContentRef" id="chat-content">
@@ -286,7 +286,8 @@
 <script setup>
 import { chatRoomStore } from '../stores/chatRoom';
 import { authenStore } from '../stores/authen';
-import PopupCallVideo from './PopupCallVideo.vue';
+// import PopupCallVideo from './PopupCallVideo.vue';
+import PopupCallVideoOneCaller from './PopupCallVideoOne.vue';
 import axios from 'axios';
 import { onMounted, onUnmounted } from '@vue/runtime-core';
 import { storeToRefs } from 'pinia'
