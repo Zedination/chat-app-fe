@@ -22,6 +22,10 @@ const props = defineProps({
         type: String,
         required: false
     },
+    peerCaller: {
+        type: Object,
+        required: false
+    },
     isCaller: Boolean,
     isShow: Boolean,
     videoEnable: Boolean,
@@ -48,7 +52,11 @@ let constraints = ref({
     video: props.videoEnable
 });
 
+const isAudioEnable = ref(props.audioEnable);
+const isVideoEnable = ref(props.videoEnable);
+
 let waitCall = ref(true);
+const caller = ref(null);
 
 const onCloseWindow = (force) => {
     stopStream();
@@ -153,7 +161,8 @@ function initSelectedDevice() {
 
 function startCall() {
     winboxRef.value.winbox.setTitle("Đang thực hiện cuộc gọi!");
-    window.peer.call('zedination-234567891', localStream.value).on('stream', function (stream) {
+    caller.value = window.peer.call(props.userId, localStream.value);
+    caller.value.on('stream', function (stream) {
         remoteVideoRef.value.srcObject = stream;
         waitCall.value = false;
         console.log(stream);
@@ -181,7 +190,14 @@ onMounted(async () => {
     await initStream();
     initSelectedDevice();
     if (props.isCaller) startCall();
-    
+    else {
+        console.log(localStream.value);
+        props.peerCaller.answer(localStream.value);
+        props.peerCaller.on("stream", remoteStream => {
+            remoteVideoRef.value.srcObject = remoteStream;
+            waitCall.value = false;
+        })
+    }
 })
 </script>
 <template>
@@ -204,18 +220,19 @@ onMounted(async () => {
                     </div>
                     <div class="p-1 border-start border-light">
                         <button type="button" class="button-icon">
-                            <i class="fas fa-video" style="color: white;"></i>
-                            <!-- <i class="fas fa-video-slash"></i> -->
+                            <i v-if="isVideoEnable" class="fas fa-video" style="color: white;"></i>
+                            <i v-else class="fas fa-video-slash" style="color: white;"></i>
                         </button>
                     </div>
                     <div class="p-1">
                         <button type="button" class="button-icon">
-                            <i class="fas fa-microphone" style="color: white;"></i>
-                            <!-- <i class="fas fa-microphone-slash"></i> -->
+                            <i v-if="isAudioEnable" class="fas fa-microphone" style="color: white;"></i>
+                            <i v-else class="fas fa-microphone-slash" style="color: white;"></i>
                         </button>
                     </div>
                     <div class="p-1">
-                        <button type="button" class="btn btn-danger"><i class="fas fa-phone fa-rotate-90"></i>&nbsp; Rời
+                        <button @click="onCloseWindow('')" type="button" class="btn btn-danger"><i
+                                class="fas fa-phone fa-rotate-90"></i>&nbsp; Rời
                             khỏi</button>
                     </div>
                     <div class="icon-button">
@@ -225,14 +242,41 @@ onMounted(async () => {
             <div class="body-video row" style="padding: 0 !important; overflow: hidden;">
                 <div class="stream-area" id="stream-area">
                     <video id="remoteVideo" ref="remoteVideoRef" class="remote-video video-container" autoplay
-                     playsinline></video>
+                        playsinline></video>
                     <div v-if="waitCall" class="caption d-flex justify-content-center align-items-center">
-                        <img :class="{'call-animation': waitCall}" width="100" height="100" style="border-radius: 50%;" src="https://www.w3schools.com/howto/img_avatar.png" alt="">
+                        <img :class="{'call-animation': waitCall}" width="100" height="100" style="border-radius: 50%;"
+                            src="https://www.w3schools.com/howto/img_avatar.png" alt="">
                     </div>
-                    <video v-show="localStream" class="local-video" ref="localVideoRef" autoplay muted playsinline></video>
+                    <video v-show="localStream && isVideoEnable" class="local-video" ref="localVideoRef" autoplay muted
+                        playsinline></video>
                 </div>
                 <div class="sidebar-area" id="sidebar-area">
                     <a href="javascript:void(0)" class="closebtn" @click="closeSideBar">X</a>
+                </div>
+                <div class="mobile-control row">
+                    <div class="col-12 d-flex align-items-center justify-content-end">
+                        <div class="p-1">
+                            <button type="button" class="button-icon" @click="showSideBar">
+                                <i class="fas fa-ellipsis-h" style="color: white;"></i>
+                            </button>
+                        </div>
+                        <div class="p-1 border-start border-light">
+                            <button type="button" class="button-icon">
+                                <i v-if="isVideoEnable" class="fas fa-video" style="color: white;"></i>
+                                <i v-else class="fas fa-video-slash" style="color: white;"></i>
+                            </button>
+                        </div>
+                        <div class="p-1">
+                            <button type="button" class="button-icon">
+                                <i v-if="isAudioEnable" class="fas fa-microphone" style="color: white;"></i>
+                                <i v-else class="fas fa-microphone-slash" style="color: white;"></i>
+                            </button>
+                        </div>
+                        <div class="p-1">
+                            <button @click="onCloseWindow('')" type="button" class="btn btn-danger"><i
+                                    class="fas fa-phone fa-rotate-90"></i></button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -241,6 +285,8 @@ onMounted(async () => {
 <style>
 .wb-body {
     overflow: hidden !important;
+    container-type: inline-size;
+    container-name: winbox;
 }
 .winbox {
     z-index: 10000 !important;
@@ -252,6 +298,8 @@ onMounted(async () => {
 }
 </style>
 <style scoped>
+
+
 /* @import '../../node_modules/winbox/dist/css/winbox.min.css'; */
 
 .header-video {
@@ -388,5 +436,30 @@ onMounted(async () => {
     bottom: 0;
     right: 0;
     z-index: 10014;
+}
+
+.mobile-control {
+    display: none;
+}
+@media only screen and (max-width: 630px) {
+    .mobile-control {
+        background-color: rgb(61, 61, 61);
+        border-radius: 5px;
+        display: block !important;
+        position: absolute;
+        bottom: 90px;
+        margin: auto;
+        height: 50px;
+        z-index: 10015;
+    }
+
+    .body-video {
+        height: 100% !important;
+        position: relative;
+    }
+
+    .header-video {
+        display: none;
+    }
 }
 </style>

@@ -29,8 +29,13 @@
               <button type="button"><i class="fas fa-search text--dark-100 font-size--18"></i></button>
             </form> -->
           </li>
-          <li class="me-4">
-            <a href="#" class="user-icon" @click.prevent="isShowPopupCallVideo=!isShowPopupCallVideo">
+          <li class="me-4" v-if="!chatRooms.getConversationOfSelectedRoom.isGroup">
+            <a href="#" class="user-icon" @click.prevent="openPopupCall(false, true)">
+              <i class="fas fa-phone fa-rotate-90 text--dark-100 font-size--18"></i>
+            </a>
+          </li>
+          <li class="me-4" v-if="!chatRooms.getConversationOfSelectedRoom.isGroup">
+            <a href="#" class="user-icon" @click.prevent="openPopupCall(true, true)">
               <i class="fas fa-video text--dark-100 font-size--18"></i>
             </a>
           </li>
@@ -65,10 +70,11 @@
             </div>
           </li>
         </ul>
-        <PopupCallVideoOneCaller :title="'Bắt đầu cuộc gọi thoại!'" :user-id="!chatRooms.getConversationOfSelectedRoom.isGroup ? chatRooms.getConversationOfSelectedRoom.userId : authen.userId" v-if="isShowPopupCallVideo" :is-show="isShowPopupCallVideo" 
-        :audio-enable="true" :video-enable="true" :is-caller="true"
-        @on-close="isShowPopupCallVideo=!isShowPopupCallVideo">
-        </PopupCallVideoOneCaller>
+        <PopupCallVideoOne :title="'Bắt đầu cuộc gọi thoại!'" :user-id="!chatRooms.getConversationOfSelectedRoom.isGroup ? chatRooms.getConversationOfSelectedRoom.userId : authen.userId" v-if="isShowPopupCallVideo" :is-show="isShowPopupCallVideo" 
+        :audio-enable="isEnableAudio" :video-enable="isEnableVideo" :is-caller="true"
+        @on-close="closePopupCall">
+        </PopupCallVideoOne>
+
       </div>
       <!-- message header end -->
       <div class="chat-content p-4 mb-3" ref="chatContentRef" id="chat-content">
@@ -287,7 +293,7 @@
 import { chatRoomStore } from '../stores/chatRoom';
 import { authenStore } from '../stores/authen';
 // import PopupCallVideo from './PopupCallVideo.vue';
-import PopupCallVideoOneCaller from './PopupCallVideoOne.vue';
+import PopupCallVideoOne from './PopupCallVideoOne.vue';
 import axios from 'axios';
 import { onMounted, onUnmounted } from '@vue/runtime-core';
 import { storeToRefs } from 'pinia'
@@ -305,6 +311,8 @@ const chatSendRef = ref(null);
 
 let isShowRightBar = ref(false);
 const isShowPopupCallVideo = ref(false);
+const isEnableAudio = ref(false);
+const isEnableVideo = ref(false);
 
 function loadMessage(selectedRoom) {
     axios.get(`${ROOT_URL}/message/get-messages-by-room`, {
@@ -368,6 +376,16 @@ function closeChats() {
   setTimeout(() => {
     document.getElementsByClassName("chats")[0].classList.remove("open");
   }, 0);
+}
+
+function closePopupCall() {
+  isShowPopupCallVideo.value = false
+}
+
+function openPopupCall(isVideo, isAudio) {
+  isEnableAudio.value = isAudio;
+  isEnableVideo.value = isVideo;
+  isShowPopupCallVideo.value = true;
 }
 
 

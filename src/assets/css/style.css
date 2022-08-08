@@ -627,3 +627,7 @@ a[data-tooltip] {
 .swal-confirm-button {
   background-color: green !important;
 }
+
+.swal2-container {
+  z-index: 99999 !important;
+}

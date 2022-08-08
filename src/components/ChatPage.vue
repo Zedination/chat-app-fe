@@ -6,6 +6,7 @@ import { loadScript } from "vue-plugin-load-script";
 import "../assets/plugins/fontawesome/all.min.js"
 import "../assets/plugins/bootstrap/bootstrap.min.js"
 import { onMounted, onUnmounted } from '@vue/runtime-core';
+import PopupCallVideoOneVue from './PopupCallVideoOne.vue';
 import axios from 'axios';
 import { chatRoomStore } from '../stores/chatRoom';
 import { authenStore } from '../stores/authen';
@@ -27,6 +28,11 @@ const connected = ref(false);
 
 const changedTemp = ref(false);
 
+const isEnableAudio = ref(true);
+const isEnableVideo = ref(false);
+const peerCaller = ref();
+const caller = ref('');
+const isShowPopupCallVideo = ref(false);
 // const soundCall = new Audio('../assets/music/call.mp3');
 
 async function loadListRooms() {
@@ -123,6 +129,12 @@ function disconnectStomp(event) {
   stomp.disconnect();
 }
 
+function acceptCall(isVideo) {
+  isEnableAudio.value = true;
+  isEnableVideo.value = isVideo;
+
+}
+
 async function initPeerJs() {
   const peer = window.peer = new Peer(authen.userId);
   peer.on('open', function (id) {
@@ -135,15 +147,28 @@ async function initPeerJs() {
       text: `Cuộc gọi đến từ ${call.peer}`,
       icon: `info`,
       showDenyButton: true,
-      confirmButtonText: '<i class="fas fa-phone"></i>',
-      denyButtonText: 'Từ chối',
+      showCancelButton: true,
+      confirmButtonText: '<i class="fas fa-video"></i>',
+      denyButtonText: '<i class="fas fa-phone"></i>',
       customClass: {
         actions: 'oncall-action',
-        denyButton: 'order-3',
+        denyButton: 'swal-confirm-button',
         confirmButton: 'swal-confirm-button'
       }
     }).then(result => {
+        if (result.isConfirmed) {
+          peerCaller.value = call;
+          isEnableVideo.value = true;
+          caller.value = call.peer;
+          isShowPopupCallVideo.value = true;
+        } else if (result.isDenied) {
+          peerCaller.value = call;
+          isEnableVideo.value = false;
+          caller.value = call.peer;
+          isShowPopupCallVideo.value = true;
+        } else {
 
+        }
     })
 
     // // Answer the call, providing our mediaStream
@@ -153,6 +178,10 @@ async function initPeerJs() {
     // })
   });
 
+}
+
+function closePopupCall() {
+  isShowPopupCallVideo.value = false;
 }
 
 onMounted(async () => {
@@ -186,6 +215,10 @@ onMounted(async () => {
     </aside>
 
     <ChatContent v-show="!chatRooms.isEmptyRoom" :temp="!changedTemp.value" @send-message="send" />
+    <PopupCallVideoOneVue :title="'Bắt đầu cuộc gọi thoại!'" :user-id="caller" v-if="isShowPopupCallVideo" :is-show="isShowPopupCallVideo" 
+        :audio-enable="isEnableAudio" :video-enable="isEnableVideo" :is-caller="false" :peer-caller="peerCaller"
+        @on-close="closePopupCall">
+    </PopupCallVideoOneVue>
   </div>
 </template>
 
