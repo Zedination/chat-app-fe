@@ -58,11 +58,13 @@ const isVideoEnable = ref(props.videoEnable);
 
 let waitCall = ref(true);
 const caller = ref(null);
+const connSender = ref();
 
 const isShowBottomControl = ref(false);
 const isClickShowBottomControl = ref(false);
 
 const onCloseWindow = (force) => {
+    if (force !== null) connSender.value.send("hangup");
     stopStream();
     emit("onClose");
 }
@@ -189,6 +191,34 @@ function startCall() {
     });
 }
 
+function handerConnectionPeerJs() {
+    console.log(props.peerCaller);
+    if (props.isCaller) {
+        connSender.value = window.peer.connect(props.userId);
+    } else {
+        connSender.value = window.peer.connect(props.peerCaller.peer);
+    }
+    window.peer.on("connection", (conn) => {
+        conn.on("data", (data) => {
+            if (data === 'hangup') {
+                onCloseWindow(null);
+            }
+        });
+        conn.on("open", () => {
+            conn.send("hello!");
+        });
+    });
+}
+
+function handleCall() {
+    console.log(localStream.value);
+    props.peerCaller.answer(localStream.value);
+    props.peerCaller.on("stream", remoteStream => {
+        remoteVideoRef.value.srcObject = remoteStream;
+        waitCall.value = false;
+    })
+}
+
 function showSideBar() {
     setTimeout(() => {
         document.getElementById('stream-area').classList.add("stream-area-menu-open");
@@ -211,14 +241,10 @@ onMounted(async () => {
     if (isMobile()) winboxRef.value.winbox.fullscreen();
     await initStream();
     initSelectedDevice();
+    handerConnectionPeerJs();
     if (props.isCaller) startCall();
     else {
-        console.log(localStream.value);
-        props.peerCaller.answer(localStream.value);
-        props.peerCaller.on("stream", remoteStream => {
-            remoteVideoRef.value.srcObject = remoteStream;
-            waitCall.value = false;
-        })
+        handleCall();
     }
 })
 /**
@@ -231,6 +257,9 @@ function isMobile() {
 }
 const toggleBottomControl  = () => {
     isClickShowBottomControl.value = !isClickShowBottomControl.value;
+}
+const onDragLocalVideo = event => {
+    console.log(event);
 }
 </script>
 <template>
@@ -284,7 +313,7 @@ const toggleBottomControl  = () => {
                         <img :class="{'call-animation': waitCall}" width="100" height="100" style="border-radius: 50%;"
                             src="https://www.w3schools.com/howto/img_avatar.png" alt="">
                     </div>
-                    <video v-show="localStream && isVideoEnable" class="local-video" ref="localVideoRef" autoplay muted
+                    <video v-show="localStream && isVideoEnable" class="local-video" :class="{'local-video-mobile': isShowBottomControl}" ref="localVideoRef" autoplay muted
                         playsinline></video>
                 </div>
                 <div class="sidebar-area" id="sidebar-area">
@@ -475,6 +504,7 @@ const toggleBottomControl  = () => {
     border-top: 2px solid rgb(136, 131, 131);
     border-right: 2px solid rgb(136, 131, 131);
     border-left: 2px solid rgb(136, 131, 131);
+    border-bottom: 2px solid rgb(136, 131, 131);
     position: absolute;
     bottom: 0;
     right: 0;
@@ -494,6 +524,12 @@ const toggleBottomControl  = () => {
     z-index: 10015;
     padding-left: 4px !important;
     padding-right: 4px !important;
+}
+
+.local-video-mobile {
+    border-bottom: 2px solid rgb(136, 131, 131);
+    top: 20px !important;
+    left: 20px !important;
 }
 
 .body-video-mobile {

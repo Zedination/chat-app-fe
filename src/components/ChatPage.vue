@@ -66,15 +66,15 @@ function firstLoadMessagesRoom(selectedRoom) {
 }
 
 function loadMessageForFirst(roomId) {
-    axios.get(`${ROOT_URL}/message/get-messages-by-room`, {
-        params: {
-            roomId: roomId
-        }
-    }).then(res => {
-        // đảo ngược array messages trước khi update vào store state
-        let messages = res.data.content.reverse();
-        chatRooms.updateMessagesOfRoom(roomId, messages);
-    });
+  axios.get(`${ROOT_URL}/message/get-messages-by-room`, {
+    params: {
+      roomId: roomId
+    }
+  }).then(res => {
+    // đảo ngược array messages trước khi update vào store state
+    let messages = res.data.content.reverse();
+    chatRooms.updateMessagesOfRoom(roomId, messages);
+  });
 }
 
 // const stompClient = Stomp.over(new SockJS(`${ROOT_URL}/chat-app`))
@@ -102,7 +102,7 @@ async function subscribe() {
   chatRooms.getListRoomIds.forEach(rId => {
     console.log(rId + " xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
     if (stomp.connected) {
-      stomp.getStompClient.subscribe(`/chat/${rId}`, handlerMessage, {id: rId});
+      stomp.getStompClient.subscribe(`/chat/${rId}`, handlerMessage, { id: rId });
     }
   })
 }
@@ -140,6 +140,16 @@ async function initPeerJs() {
   peer.on('open', function (id) {
     console.log('My peer ID is: ' + id);
   });
+  peer.on("connection", (conn) => {
+    conn.on("data", (data) => {
+      if (data === 'hangup') {
+        Swal.close();
+      }
+    });
+    conn.on("open", () => {
+      conn.send("hello!");
+    });
+  });
   peer.on('call', function (call) {
     console.log(call);
     Swal.fire({
@@ -156,19 +166,20 @@ async function initPeerJs() {
         confirmButton: 'swal-confirm-button'
       }
     }).then(result => {
-        if (result.isConfirmed) {
-          peerCaller.value = call;
-          isEnableVideo.value = true;
-          caller.value = call.peer;
-          isShowPopupCallVideo.value = true;
-        } else if (result.isDenied) {
-          peerCaller.value = call;
-          isEnableVideo.value = false;
-          caller.value = call.peer;
-          isShowPopupCallVideo.value = true;
-        } else {
-
-        }
+      if (result.isConfirmed) {
+        peerCaller.value = call;
+        isEnableVideo.value = true;
+        caller.value = call.peer;
+        isShowPopupCallVideo.value = true;
+      } else if (result.isDenied) {
+        peerCaller.value = call;
+        isEnableVideo.value = false;
+        caller.value = call.peer;
+        isShowPopupCallVideo.value = true;
+      } else if (result.dismiss === 'cancel') {
+        const connect = peer.connect(call.peer);
+        connect.send("hangup");
+      }
     })
 
     // // Answer the call, providing our mediaStream
@@ -207,17 +218,17 @@ onMounted(async () => {
 
 <template>
   <div class="layout d-lg-flex">
-    <LeftNav/>
+    <LeftNav />
     <aside class="sidebar border-end border--gray">
-          <div class="tab_content">
-            <RouterView />
-          </div>
+      <div class="tab_content">
+        <RouterView />
+      </div>
     </aside>
 
     <ChatContent v-show="!chatRooms.isEmptyRoom" :temp="!changedTemp.value" @send-message="send" />
-    <PopupCallVideoOneVue :title="'Bắt đầu cuộc gọi thoại!'" :user-id="caller" v-if="isShowPopupCallVideo" :is-show="isShowPopupCallVideo" 
-        :audio-enable="isEnableAudio" :video-enable="isEnableVideo" :is-caller="false" :peer-caller="peerCaller"
-        @on-close="closePopupCall">
+    <PopupCallVideoOneVue :title="'Bắt đầu cuộc gọi thoại!'" :user-id="caller" v-if="isShowPopupCallVideo"
+      :is-show="isShowPopupCallVideo" :audio-enable="isEnableAudio" :video-enable="isEnableVideo" :is-caller="false"
+      :peer-caller="peerCaller" @on-close="closePopupCall">
     </PopupCallVideoOneVue>
   </div>
 </template>
