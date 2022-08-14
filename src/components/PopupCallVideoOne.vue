@@ -113,6 +113,12 @@ function stopStream() {
     }
     localStream.value = null;
 }
+function consoleLocalStream() {
+    console.log(localStream.value);
+    localStream.value.getTracks().forEach(track => {
+        console.log(track);
+    })
+}
 async function getDeviceInfor() {
     try {
         let deviceInfos = await navigator.mediaDevices.enumerateDevices();
@@ -246,6 +252,7 @@ onMounted(async () => {
     else {
         handleCall();
     }
+    consoleLocalStream();
 })
 /**
  * Check device is mobile by user agent
@@ -308,13 +315,13 @@ const onDragLocalVideo = event => {
             <div class="body-video row" :class="{'body-video-mobile': isShowBottomControl}" style="padding: 0 !important; overflow: hidden;">
                 <div class="stream-area" id="stream-area">
                     <video id="remoteVideo" ref="remoteVideoRef" class="remote-video video-container" autoplay
-                        playsinline></video>
+                        playsinline style="pointer-events: none;"></video>
                     <div v-if="waitCall" class="caption d-flex justify-content-center align-items-center">
                         <img :class="{'call-animation': waitCall}" width="100" height="100" style="border-radius: 50%;"
                             src="https://www.w3schools.com/howto/img_avatar.png" alt="">
                     </div>
                     <video v-show="localStream && isVideoEnable" class="local-video" :class="{'local-video-mobile': isShowBottomControl}" ref="localVideoRef" autoplay muted
-                        playsinline></video>
+                        playsinline style="pointer-events: none;"></video>
                 </div>
                 <div class="sidebar-area" id="sidebar-area">
                     <a href="javascript:void(0)" class="closebtn" @click="closeSideBar">X</a>

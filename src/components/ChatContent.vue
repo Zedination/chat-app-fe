@@ -97,7 +97,7 @@
                       <i class="fas fa-ellipsis-v text--dark-100"></i>
                     </button>
                     <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton13">
-                      <li><a @click="navigator.clipboard.writeText(message.content)"
+                      <li><a @click="unsecuredCopyToClipboard(message.content)"
                           class="dropdown-item d-flex justify-content-between align-items-center text--dark-100 font-size--14"
                           href="#">sao chép<i class="far fa-copy text--dark-100"></i></a></li>
                       <li><a
@@ -127,10 +127,10 @@
                       <i class="fas fa-ellipsis-v text--dark-100"></i>
                     </button>
                     <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton14">
-                      <li><a @click="navigator.clipboard.writeText(message.content)"
-                          class="dropdown-item d-flex justify-content-between align-items-center" href="#">sao chép<i
+                      <li><a @click="unsecuredCopyToClipboard(message.content)"
+                          class="dropdown-item d-flex justify-content-between align-items-center text--dark-100 font-size--14" href="#">sao chép<i
                             class="far fa-copy"></i></a></li>
-                      <li><a class="dropdown-item d-flex justify-content-between align-items-center" href="#">xóa<i
+                      <li><a class="dropdown-item d-flex justify-content-between align-items-center text--dark-100 font-size--14" href="#">xóa<i
                             class="fas fa-trash-alt"></i></a></li>
                     </ul>
                   </div>
@@ -166,11 +166,15 @@
                       class="far fa-images me-2"></i>photos or videos
                     <input name="fileInput" type="file" class="form-control-file d-none"></label>
                 </li>
-                <li>
+                <!-- <li>
                   <a class="dropdown-item d-flex justify-content-between align-items-center font-size--14" href="#"><i
                       class="far fa-smile-beam me-2"></i>emoji</a>
-                </li>
+                </li> -->
               </ul>
+              <button @click="toggleEmojiPopup" class="btn p-0 btn-secondary ms-2 button-open-emoji" type="button">
+                <i class="far fa-smile-beam text--dark-100 font-size--18"></i>
+              </button>
+              <EmojiPicker v-show="isShowEmoji" class="picker-emoji" @select="addEmojiToInput" />
             </div>
             <div class="input-group">
               <textarea @keydown.enter.prevent="sendMessageWithEnter($event)"
@@ -298,6 +302,8 @@ import axios from 'axios';
 import { onMounted, onUnmounted } from '@vue/runtime-core';
 import { storeToRefs } from 'pinia'
 import appEmitter from '../composables/emiter.js';
+import EmojiPicker from 'vue3-emoji-picker'
+import '../../node_modules/vue3-emoji-picker/dist/style.css'
 import { isProxy, toRaw, ref, reactive, watch } from 'vue';
 const ROOT_URL = import.meta.env.VITE_ROOT_API;
 const emit = defineEmits(['sendMessage', 'submit'])
@@ -308,6 +314,7 @@ const noImage = ref('https://t3.ftcdn.net/jpg/04/34/72/82/360_F_434728286_OWQQvA
 
 const chatContentRef = ref(null);
 const chatSendRef = ref(null);
+const isShowEmoji = ref(false);
 
 let isShowRightBar = ref(false);
 const isShowPopupCallVideo = ref(false);
@@ -354,6 +361,7 @@ function sendMessageWithEnter(event) {
   }
   emit('sendMessage', messagePayload);
   event.target.value = '';
+  isShowEmoji.value = false;
 }
 
 function sendMessageWithButton() {
@@ -366,6 +374,28 @@ function sendMessageWithButton() {
   }
   emit('sendMessage', messagePayload);
   chatSendRef.value.value = '';
+  isShowEmoji.value = false;
+}
+
+const toggleEmojiPopup = () => {
+  isShowEmoji.value = !isShowEmoji.value;
+}
+const addEmojiToInput = emoji => {
+  chatSendRef.value.value += emoji.i;
+}
+
+function unsecuredCopyToClipboard(text) {
+  const textArea = document.createElement("textarea");
+  textArea.value = text;
+  document.body.appendChild(textArea);
+  textArea.focus();
+  textArea.select();
+  try {
+    document.execCommand('copy');
+  } catch (err) {
+    console.error('Unable to copy to clipboard', err);
+  }
+  document.body.removeChild(textArea);
 }
 
 function scrollToBottom() {
@@ -412,5 +442,12 @@ function openPopupCall(isVideo, isAudio) {
   top: 50%;
   -ms-transform: translateY(-50%);
   transform: translateY(-50%);
+}
+.button-open-emoji {
+  position: relative;
+}
+.picker-emoji {
+  position: absolute;
+  bottom: 60px;
 }
 </style>
