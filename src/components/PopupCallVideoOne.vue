@@ -79,10 +79,12 @@ const onResizeWindow = event => {
 
 const toggleAudio = () => {
     isAudioEnable.value = !isAudioEnable.value;
+    toggleTrack('audio');
 }
 
 const toggleVideo = () => {
     isVideoEnable.value = !isVideoEnable.value;
+    toggleTrack('video');
 }
 async function initStream() {
     stopStream();
@@ -118,6 +120,19 @@ function consoleLocalStream() {
     localStream.value.getTracks().forEach(track => {
         console.log(track);
     })
+}
+/**
+ * @param {*} type ('audio' or 'video')
+ */
+const toggleTrack = type => {
+    let track = localStream.value.getTracks().find(track => track.kind === type);
+    if (track.enabled) {
+        track.enabled = false;
+    } else {
+        track.enabled = true;
+    }
+    console.log(localStream.value);
+    localVideoRef.value.srcObject = localStream.value;
 }
 async function getDeviceInfor() {
     try {
@@ -208,6 +223,13 @@ function handerConnectionPeerJs() {
         conn.on("data", (data) => {
             if (data === 'hangup') {
                 onCloseWindow(null);
+            }
+            // disable camera
+            if (data.startWith(`disable-camera-`)) {
+                let peer = data.split("-")[2];
+                if (props.isCaller && props.userId === peer) {
+                    
+                }
             }
         });
         conn.on("open", () => {

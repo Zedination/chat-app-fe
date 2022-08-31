@@ -8,7 +8,7 @@ export const authenStore = defineStore({
         userInfo: {}
     }),
     getters: {
-        getUserInfo: state => state.userInfo
+        getUserInfo: state => state.userInfo,
     },
     // actions: {
     //     setIsLoginPage(isLoginPage) {

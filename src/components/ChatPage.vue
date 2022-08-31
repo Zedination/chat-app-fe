@@ -135,6 +135,23 @@ function acceptCall(isVideo) {
 
 }
 
+function initCachedFriend() {
+  const request = window.indexedDB.open('chatDB', 1);
+  let db;
+  request.onsuccess = event => {
+    db = request.result;
+    
+  };
+
+  request.onupgradeneeded = (event) => {
+    db = event.target.result
+    db.createObjectStore('cachedFriend', {
+      // Giá trị cột key tự động tăng
+      autoIncrement: true
+    });
+  }
+}
+
 async function initPeerJs() {
   const peer = window.peer = new Peer(authen.userId);
   peer.on('open', function (id) {
